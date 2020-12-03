@@ -221,7 +221,7 @@ def main():
 
     rows_list = []
     for index, row in df_new.iterrows():
-        
+
         dict1 = {}
 
         print(row.gsis_id)
@@ -234,17 +234,46 @@ def main():
         dict1['position'] = row.position
         dict1['gsis_id'] = row.gsis_id
 
+        print(len(dict1['position']))
+        print(dict1)
         rows_list.append(dict1)
 
     new_data = pd.DataFrame(rows_list)
+
+
 
     # print(new_data)
 
     pos_data = pd.concat([pos_data, new_data], axis=0).reset_index()
     pos_data.drop('index', axis=1, inplace=True)
     pos_data.drop_duplicates(keep=False, inplace=True)
-    # print(pos_data)
-    
+    pos_data.reset_index(inplace=True)
+    pos_data.drop('index', axis=1, inplace=True)
+    index_list = pos_data.index.tolist()
+    index_list.reverse()
+    print(index_list)
+
+    print(pos_data)
+    delete_indexes = []
+    checked_rows = []
+    for i in index_list:
+        # print(i)
+        # print(pos_data.iloc[i])
+        row_check = str(pos_data.iloc[i]['gsis_id']) + str(pos_data.iloc[i]['season'])
+        # print(row_check)
+        # print(i)
+        if row_check in checked_rows:
+            delete_indexes.append(i)
+        else:
+            checked_rows.append(row_check)
+
+    print(pos_data)
+    print(delete_indexes)
+
+    pos_data.drop(pos_data.index[[delete_indexes]], inplace=True)
+    print(pos_data)
+
+
     save_csv(pos_data, '../data/pos_data.csv')
 
 
