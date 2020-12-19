@@ -112,19 +112,30 @@ teams = set(data['Team'].tolist())
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
-    html.P("Team"),
+
+    html.P("OFF"),
     dcc.Dropdown(
-        id='team',
+        id='off_team',
         options=[{"value": x, "label": x}
                     for x in teams],
         value = 'SEA'
     ),
-    dcc.Graph(id='graph'),
+    dcc.Graph(id='off_graph'),
+
+    html.P("DEF"),
+    dcc.Dropdown(
+        id='def_team',
+        options=[{"value": x, "label": x}
+                    for x in teams],
+        value = 'SEA'
+    ),
+    dcc.Graph(id='def_graph'),
+    
 ])
 
 @app.callback(
-    Output("graph", "figure"),
-    [Input("team", 'value')])
+    Output("off_graph", "figure"),
+    [Input("off_team", 'value')])
 def change_team(team):
     print(team)
     labels_dict = dict(x='Play Direction', y='Play Types', color='Ranking')
