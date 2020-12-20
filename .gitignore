@@ -67,3 +67,4 @@ node_modules/
 
 # CSVs
 data/reg_pbp.csv
+data/play_by_play_2020.csv

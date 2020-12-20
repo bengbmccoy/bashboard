@@ -130,7 +130,7 @@ app.layout = html.Div([
         value = 'SEA'
     ),
     dcc.Graph(id='def_graph'),
-    
+
 ])
 
 @app.callback(
