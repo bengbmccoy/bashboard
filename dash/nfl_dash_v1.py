@@ -25,6 +25,15 @@ import pandas as pd
 import numpy as np
 import argparse
 
+class TeamTrend:
+    def __init__(self):
+        self.trend_df = self.get_trend_data()
+        self.trend_df.rename(columns={'Unnamed: 1': 'delete'}, inplace=True)
+        # print(self.trend_df)
+
+    def get_trend_data(self):
+        return pd.read_csv('../data/team_trends.csv', index_col=0)
+
 def process_arrays(data, plot_array, labels_array, team):
     '''Fill the plot_array and labels_array arrays by iterating through runs
     short passes and long passes and finding the rank and comparisson to the
@@ -97,6 +106,7 @@ def_heatmap_data = get_heatmap_data('def', [2019])
 
 teams = set(off_heatmap_data['Team'].tolist())
 
+trends = TeamTrend()
 # print(teams)
 
 app = dash.Dash(__name__)
@@ -117,10 +127,11 @@ app.layout = html.Div(className='row', children=[
         dcc.Graph(id='off_heatmap', style={'display': 'inline-block'}),
         dcc.Graph(id='def_heatmap', style={'display': 'inline-block'})
     ]),
-    #
-    # html.Div([ # setup histogram object
-    #     dcc.Graph(id='def_heatmap')
-    # ]),
+
+    html.Div(children=[ # setup histogram object
+        dcc.Graph(id='off_linegraph', style={'display': 'inline-block'}),
+        dcc.Graph(id='def_linegraph', style={'display': 'inline-block'})
+    ]),
 
 ])
 
@@ -128,13 +139,14 @@ app.layout = html.Div(className='row', children=[
 @app.callback(
     Output(component_id='off_heatmap', component_property='figure'),
     Output(component_id='def_heatmap', component_property='figure'),
+    Output(component_id='off_linegraph', component_property='figure'),
+    Output(component_id='def_linegraph', component_property='figure'),
     Input(component_id='off_team', component_property='value')
 )
 def update_figures(my_dropdown):
     # create figures to return to the call back
 
-    print(my_dropdown)
-
+    ''' Strengths & Weaknesses Heatmaps #1 & #2'''
     labels_dict = dict(x='Play Direction', y='Play Types', color='Ranking')
     x_labels = ['Left', 'Middle', 'Right']
     y_labels = ['Long Pass', 'Short Pass', 'Run']
@@ -146,7 +158,24 @@ def update_figures(my_dropdown):
     def_plot_array, def_labels_array = process_arrays(d_data, def_plot_array, def_labels_array, my_dropdown)
     fig1 = px.imshow(off_plot_array, labels=labels_dict, x=x_labels, y=y_labels, zmax=32, zmin=1, color_continuous_scale='rdylgn_r')
     fig2 = px.imshow(def_plot_array, labels=labels_dict, x=x_labels, y=y_labels, zmax=32, zmin=1, color_continuous_scale='rdylgn_r')
-    return fig1, fig2
+
+    ''' Weekly Yards Gained by Play Type Bar graph #3 '''
+
+    df3 = trends.trend_df.loc[my_dropdown, :]
+    # print(df3)
+    fig3 = px.bar(df3, x='game_no', y='yards_gained', color='play_type', hover_name='play_direction')
+
+    ''' Total yards gained by play type and play direction sunburst chart #4'''
+
+    df4 = px.data.gapminder().query("year == 2007")
+    # print(df4)
+    fig4 = px.sunburst(df3, path=['play_type', 'play_direction'], values='yards_gained',
+                        color_discrete_map={'run':'green', 'short_pass':'red', 'long_pass':'blue'})
+    # fig.show()
+
+
+
+    return fig1, fig2, fig3, fig4
 
 
 if __name__ == "__main__":
