@@ -12,9 +12,13 @@ To run:
 
 $ python trends_aggregation.py
 
+CURRENT STATE:
+pulling from the pbp_data.csv file
+saving a file named team_trends.csv
+
 TODO:
 - Add the filename as input from an argument
-- Figure out a strategy for dealing with different seasons
+- Figure out a strategy for dealing with different seasons and/pr updating data
 '''
 
 import pandas as pd

@@ -42,27 +42,30 @@ class TeamTrend:
 
 class Heatmap:
     def __init__(self):
+        # get heatmap data
         self.off_heatmap_df = self.get_heatmap_data('off', [2019])
         self.def_heatmap_df = self.get_heatmap_data('def', [2019])
+
+        # get list of teams for dropdown
         self.teams = set(self.off_heatmap_df['Team'].tolist())
 
+        # items required for plot
         self.labels_dict = dict(x='Play Direction', y='Play Types', color='Ranking')
         self.x_labels = ['Left', 'Middle', 'Right']
         self.y_labels = ['Long Pass', 'Short Pass', 'Run']
 
+        # 3x3 plot and label arrays
         self.off_plot_array, self.off_labels_array = self.init_arrays()
         self.def_plot_array, self.def_labels_array = self.init_arrays()
 
+        # add rankings to the heatmap dataframes
         self.gen_rankings_tables()
-        # print(self.off_rank_table)
-        # print(self.def_rank_table)
-
-    def get_ranks_matrix(self, team):
-        print(team)
-        print(self.off_rank_table)
-        print(self.off_plot_array)
 
     def gen_rankings_tables(self):
+        '''This function creates a copy of the heatmap data, then orders the
+        table by each play type and direction and creates a new column with the
+        rankings for each play type and directions.'''
+
         self.off_rank_table = self.off_heatmap_df.copy()
         for i in list(self.off_heatmap_df.columns):
             if i not in ['Team', 'Year']:
@@ -98,76 +101,56 @@ class Heatmap:
 
         return plot_array, labels_array
 
+    def update_arrays(self, team):
+        '''This function updates the offence and defence plot arrays with the latest selection of team'''
 
-def process_arrays(data, plot_array, labels_array, team):
-    '''Fill the plot_array and labels_array arrays by iterating through runs
-    short passes and long passes and finding the rank and comparisson to the
-    league average.'''
+        # offence
+        self.off_plot_array[0,0] = self.off_rank_table.loc[self.off_rank_table['Team'] == team, 'Pass long left rank'].iloc[0]
+        self.off_plot_array[0,1] = self.off_rank_table.loc[self.off_rank_table['Team'] == team, 'Pass long middle rank'].iloc[0]
+        self.off_plot_array[0,2] = self.off_rank_table.loc[self.off_rank_table['Team'] == team, 'Pass long right rank'].iloc[0]
 
-    # print(data)
-    # print(team)
-    # print(plot_array)
-    # print(labels_array)
+        self.off_plot_array[1,0] = self.off_rank_table.loc[self.off_rank_table['Team'] == team, 'Pass short left rank'].iloc[0]
+        self.off_plot_array[1,1] = self.off_rank_table.loc[self.off_rank_table['Team'] == team, 'Pass short middle rank'].iloc[0]
+        self.off_plot_array[1,2] = self.off_rank_table.loc[self.off_rank_table['Team'] == team, 'Pass short right rank'].iloc[0]
 
-    # Set index to Team
-    # print('here1.1')
-    # print(data)
-    # print(team)
-    # data.set_index('Team', inplace=True)
-    # print('here1.2')
-    # Iterate through matrix rows
-    for i in range(3):
-        # Iterate through matrix cols
-        for j in range(3):
+        self.off_plot_array[2,0] = self.off_rank_table.loc[self.off_rank_table['Team'] == team, 'Run left rank'].iloc[0]
+        self.off_plot_array[2,1] = self.off_rank_table.loc[self.off_rank_table['Team'] == team, 'Run middle rank'].iloc[0]
+        self.off_plot_array[2,2] = self.off_rank_table.loc[self.off_rank_table['Team'] == team, 'Run right rank'].iloc[0]
 
-            # generate column name to reference in data
-            col_name = ''
-            if i == 2:
-                col_name += 'Run '
-            elif i == 1:
-                col_name += 'Pass short '
-            elif i == 0:
-                col_name += 'Pass long '
 
-            if j == 0:
-                col_name += 'left rank'
-            elif j == 1:
-                col_name += 'middle rank'
-            elif j == 2:
-                col_name += 'right rank'
+        # defence
+        self.def_plot_array[0,0] = self.def_rank_table.loc[self.def_rank_table['Team'] == team, 'Pass long left rank'].iloc[0]
+        self.def_plot_array[0,1] = self.def_rank_table.loc[self.def_rank_table['Team'] == team, 'Pass long middle rank'].iloc[0]
+        self.def_plot_array[0,2] = self.def_rank_table.loc[self.def_rank_table['Team'] == team, 'Pass long right rank'].iloc[0]
 
-            # sort by col_name
-            data.sort_values(by=col_name, inplace=True, )
-            # get index of team after sorted
-            plot_array[i,j] = 32 - data.index.get_loc(team)
-            # find league avg of col_name
-            avg = data[col_name].mean()
-            # get diff vs league avg of col_name
-            labels_array[i,j] = data.at[team, col_name] - avg
+        self.def_plot_array[1,0] = self.def_rank_table.loc[self.def_rank_table['Team'] == team, 'Pass short left rank'].iloc[0]
+        self.def_plot_array[1,1] = self.def_rank_table.loc[self.def_rank_table['Team'] == team, 'Pass short middle rank'].iloc[0]
+        self.def_plot_array[1,2] = self.def_rank_table.loc[self.def_rank_table['Team'] == team, 'Pass short right rank'].iloc[0]
 
-    # return arrays
-    return plot_array, labels_array
+        self.def_plot_array[2,0] = self.def_rank_table.loc[self.def_rank_table['Team'] == team, 'Run left rank'].iloc[0]
+        self.def_plot_array[2,1] = self.def_rank_table.loc[self.def_rank_table['Team'] == team, 'Run middle rank'].iloc[0]
+        self.def_plot_array[2,2] = self.def_rank_table.loc[self.def_rank_table['Team'] == team, 'Run right rank'].iloc[0]
+
+        # print(self.off_plot_array) # For Debugging
 
 ##########################################
 ''''''''''''''''''''''''''''''''''''''''''
 ''' ########## START PROGRAM ########## '''
 
-# off_heatmap_data = get_heatmap_data('off', [2019])
-# def_heatmap_data = get_heatmap_data('def', [2019])
-#
-# teams = set(off_heatmap_data['Team'].tolist())
-
+# init Heatmap object to manage the heatmap plots and dataframes
 heatmaps = Heatmap()
 
+# init Trends object to manage the heatmap plots and dataframes
 trends = TeamTrend()
 
-# print(heatmaps.teams)
-# print(trends)
+# init the current team variable to optimise
+curr_team = 'None'
 
-# print(set(trends.trend_df.index.to_list()))
-# print(teams)
-
+# Start running the application
 app = dash.Dash(__name__)
+
+######################################
+''' ######  HTML HERE ########### '''
 
 # set up the layout of the page
 app.layout = html.Div(className='row', children=[
@@ -193,6 +176,8 @@ app.layout = html.Div(className='row', children=[
 
 ])
 
+
+
 # Get input value from dropdown, return line_graph and histogram as figures
 @app.callback(
     Output(component_id='off_heatmap', component_property='figure'),
@@ -206,20 +191,11 @@ def update_figures(my_dropdown):
 
     ''' Strengths & Weaknesses Heatmaps #1 & #2'''
 
-    # print(heatmaps.off_heatmap_df)
-    # print(heatmaps.def_heatmap_df)
+    if my_dropdown != curr_team:
+        heatmaps.update_arrays(my_dropdown)
 
-    heatmaps.get_ranks_matrix(my_dropdown)
-
-    off_plot_array, off_labels_array = process_arrays(heatmaps.off_heatmap_df.copy(), heatmaps.off_plot_array, heatmaps.off_labels_array, my_dropdown)
-    def_plot_array, def_labels_array = process_arrays(heatmaps.def_heatmap_df.copy(), heatmaps.def_plot_array, heatmaps.def_labels_array, my_dropdown)
-
-    # print(off_plot_array)
-    # print(def_plot_array)
-
-
-    fig1 = px.imshow(off_plot_array, labels=heatmaps.labels_dict, x=heatmaps.x_labels, y=heatmaps.y_labels, zmax=32, zmin=1, color_continuous_scale='rdylgn_r')
-    fig2 = px.imshow(def_plot_array, labels=heatmaps.labels_dict, x=heatmaps.x_labels, y=heatmaps.y_labels, zmax=32, zmin=1, color_continuous_scale='rdylgn_r')
+    fig1 = px.imshow(heatmaps.off_plot_array, labels=heatmaps.labels_dict, x=heatmaps.x_labels, y=heatmaps.y_labels, zmax=32, zmin=1, color_continuous_scale='rdylgn_r')
+    fig2 = px.imshow(heatmaps.def_plot_array, labels=heatmaps.labels_dict, x=heatmaps.x_labels, y=heatmaps.y_labels, zmax=32, zmin=1, color_continuous_scale='rdylgn_r')
 
     ''' Weekly Yards Gained by Play Type Bar graph #3 '''
 
