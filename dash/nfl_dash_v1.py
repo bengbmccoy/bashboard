@@ -6,8 +6,6 @@ statistics that runs un your browser and will eventually be published to
 bashboard.fyi
 
 TODO:
-- Create a heatmap class
-- Add Comments
 - Generally tidy and restructure
 - Format the dash webpage to be actually nice
 - Make colours more consistent
@@ -15,7 +13,7 @@ TODO:
 - Switch run yards data model to include run gaps and not directions
 - Add the avg yards gained to graph #3
 - Add the weekly form heatmap (Top 8, Top 16, Bottom 16)
-- Deply to firebase
+- Deploy to firebase
 '''
 
 import dash
@@ -23,6 +21,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 
 import numpy as np
@@ -194,7 +193,13 @@ def update_figures(my_dropdown):
     if my_dropdown != curr_team:
         heatmaps.update_arrays(my_dropdown)
 
-    fig1 = px.imshow(heatmaps.off_plot_array, labels=heatmaps.labels_dict, x=heatmaps.x_labels, y=heatmaps.y_labels, zmax=32, zmin=1, color_continuous_scale='rdylgn_r')
+    fig1 = go.Figure(px.imshow(heatmaps.off_plot_array, labels=heatmaps.labels_dict,
+                        x=heatmaps.x_labels, y=heatmaps.y_labels, zmax=32,
+                        zmin=1, color_continuous_scale='rdylgn_r'))
+    fig1.update_layout(
+        title={
+            'text': "Offensive Strengths & Weaknesses",
+            'xanchor': 'center', 'yanchor': 'top'})
     fig2 = px.imshow(heatmaps.def_plot_array, labels=heatmaps.labels_dict, x=heatmaps.x_labels, y=heatmaps.y_labels, zmax=32, zmin=1, color_continuous_scale='rdylgn_r')
 
     ''' Weekly Yards Gained by Play Type Bar graph #3 '''
