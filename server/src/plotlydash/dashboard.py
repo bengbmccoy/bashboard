@@ -144,7 +144,7 @@ def init_dashboard(server):
     # set up the layout of the page
     dash_app.layout = html.Div(className='row', children=[
         html.Div([
-            html.Label(['Team']), # Text above dropdown
+            html.Label(['Select your team to analyse']), # Text above dropdown
                 dcc.Dropdown(
                     id='off_team',
                     options=[{"value": x, "label": x}
@@ -187,26 +187,38 @@ def init_callbacks(dash_app, heatmaps, trends, curr_team):
 
         ''' Strengths & Weaknesses Heatmaps #1 & #2'''
 
-        fig1 = go.Figure(px.imshow(heatmaps.off_plot_array, labels=heatmaps.labels_dict,
+        fig1 = px.imshow(heatmaps.off_plot_array, labels=heatmaps.labels_dict,
                             x=heatmaps.x_labels, y=heatmaps.y_labels, zmax=32,
-                            zmin=1, color_continuous_scale='rdylgn_r'))
+                            zmin=1, color_continuous_scale='rdylgn_r',
+                            title="Offensive Strengths/Weaknesses Heatmap")
+        fig1.update(layout=dict(title=dict(x=0.5)))
 
         fig2 = px.imshow(heatmaps.def_plot_array, labels=heatmaps.labels_dict,
                             x=heatmaps.x_labels, y=heatmaps.y_labels, zmax=32,
-                            zmin=1, color_continuous_scale='rdylgn_r')
+                            zmin=1, color_continuous_scale='rdylgn_r',
+                            title="Defensive Strengths/Weaknesses Heatmap")
+        fig2.update(layout=dict(title=dict(x=0.5)))
 
         ''' Weekly Yards Gained by Play Type Bar graph #3 '''
 
         df3 = trends.trend_df.loc[my_dropdown, :]
         # print(df3)
-        fig3 = px.bar(df3, x='game_no', y='yards_gained', color='play_type', hover_name='play_direction')
+        fig3 = px.bar(df3, x='opp', y='yards_gained', color='play_type',
+                        hover_name='play_direction', title="Yards Gained per game",
+                        range_y=[0,1100],
+                        labels={
+                            "opp": "Opposition",
+                            "yards_gained": "Yards Gained by play type",
+                            "play_type": "Play Type"
+                        })
+        fig3.update(layout=dict(title=dict(x=0.5)))
 
         ''' Total yards gained by play type and play direction sunburst chart #4'''
 
-        df4 = px.data.gapminder().query("year == 2007")
-        # print(df4)
         fig4 = px.sunburst(df3, path=['play_type', 'play_direction'], values='yards_gained',
-                            color_discrete_map={'run':'green', 'short_pass':'red', 'long_pass':'blue'})
+                            color_discrete_map={'run':'green', 'short_pass':'red', 'long_pass':'blue'},
+                            title="Total yards gained by play type and direction")
+        fig4.update(layout=dict(title=dict(x=0.5)))
         # fig.show()
 
         return fig1, fig2, fig3, fig4
