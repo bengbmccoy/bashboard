@@ -15,3 +15,10 @@ $ gcloud run deploy --image gcr.io/bashboard-40f7b/bashboard-image
 
 #To deploy the hosting:
 $ firebase deploy --only hosting
+
+#TODO:
+- Clean up the landing/index page
+- Clean up the dashboard page
+-- Add titles to the graphs, clean up the labels
+-- Get some kind of layout properly organised
+- Add the rest of the backend operations (i.e. data, data models, aggregation etc.)
